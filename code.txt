@@ -1,75 +1,63 @@
- 
-abstract class GymMember {
-   protected int id, attendance;
-   protected String name, location, phone, email, gender, DOB, membershipStartDate;
-   protected double loyaltyPoints;
-   protected boolean activeStatus;
-   
-   public GymMember(int id, String name, String location, String phone, String email, String gender, String DOB, String membershipStartDate){
-       this.id = id;
-       this.name = name;
-       this.location = location;
-       this.phone = phone;
-       this.email = email;
-       this.gender = gender;
-       this.DOB = DOB;
-       this.membershipStartDate = membershipStartDate;
-       this.attendance = 0;
-       this.loyaltyPoints = 0.0;
-       this.activeStatus = false;
-   }
-   
-   public int getId(){
-       return id;
-   }
-   
-   public String getName(){
-       return name;
-   }
-   
-   public String getLocation(){
-       return location;
-   }
-   
-   public String getPhone(){
-       return phone;
-   }
-   
-   public String getEmail(){
-       return email;
-   }
-   
-   public String getGender(){
-       return gender;
-   }
-   
-   public String getDOB(){
-       return DOB;
-   }
-   
-   public String getMembershipStartDate(){
-       return membershipStartDate;
-   }
-   
-   public int getAttendance(){
-       return attendance;
-   }
-   
-   public double getLoyaltyPoints(){
-       return loyaltyPoints;
-   }
-   
-   public boolean getActiveStatus(){
-       return activeStatus;
-   }
-   
-   public abstract void markAttendance();//abstract method
-   
-   public void activateMembership(){
-       if(!this.activeStatus) {
-           this.activeStatus = true;
-           System.out.println("Membership activated successfully.");
-       } else {
-           System.out.println("Membership is already active.");
-       }
-   
+import os
+import json
+
+TASK_FILE = "tasks.json"
+
+def load_tasks():
+    if not os.path.exists(TASK_FILE):
+        return {"pending": [], "completed": []}
+    with open(TASK_FILE, "r") as f:
+        return json.load(f)
+
+def save_tasks(tasks):
+    with open(TASK_FILE, "w") as f:
+        json.dump(tasks, f, indent=4)
+
+def add_task(task):
+    tasks = load_tasks()
+    tasks["pending"].append(task)
+    save_tasks(tasks)
+    print(f"✅ Task added: {task}")
+
+def complete_task(index):
+    tasks = load_tasks()
+    if 0 <= index < len(tasks["pending"]):
+        task = tasks["pending"].pop(index)
+        tasks["completed"].append(task)
+        save_tasks(tasks)
+        print(f"✔️ Task completed: {task}")
+    else:
+        print("❌ Invalid task number.")
+
+def list_tasks():
+    tasks = load_tasks()
+    print("\n📝 Pending Tasks:")
+    if tasks["pending"]:
+        for i, task in enumerate(tasks["pending"]):
+            print(f"{i + 1}. {task}")
+    else:
+        print("None")
+
+    print("\n✅ Completed Tasks:")
+    if tasks["completed"]:
+        for task in tasks["completed"]:
+            print(f"- {task}")
+    else:
+        print("None")
+
+def delete_task(index):
+    tasks = load_tasks()
+    if 0 <= index < len(tasks["pending"]):
+        task = tasks["pending"].pop(index)
+        save_tasks(tasks)
+        print(f"🗑️ Deleted task: {task}")
+    else:
+        print("❌ Invalid task number.")
+
+def main():
+    while True:
+        print("\n--- To-Do List Menu ---")
+        print("1. Add task")
+        print("2. Complete task")
+        print("3. View tasks")
+        print("4. Delete task
