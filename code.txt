@@ -1,0 +1,132 @@
+from datetime import datetime
+
+def read_products(file_name="WeCare.txt"):
+    products = []
+    try:
+        with open(file_name, 'r') as file:
+            for line in file:
+                product_data = line.strip().split(",")
+                products.append({
+                    'name': product_data[0],
+                    'brand': product_data[1],
+                    'quantity': int(product_data[2]),
+                    'cost_price': float(product_data[3]),
+                    'country': product_data[4]
+                })
+    except FileNotFoundError:
+        print("Product file is not here.")
+    return products
+
+def write_bill(bill_data, file_name):
+    try:
+        with open(file_name, 'w') as file:
+            file.write(bill_data)
+    except IOError:
+        print("Error writing bill file.")
+
+def update_stock(products, file_name="WeCare.txt"):
+    try:
+        with open(file_name, 'w') as file:
+            for product in products:
+                file.write(f"{product['name']},{product['brand']},{product['quantity']},{product['cost_price']},{product['country']}\n")
+    except IOError:
+        print("Error updating product stock.")
+
+def purchase_product(products, file_name="WeCare.txt"):
+    customer_name = input("Enter the customer name: ")
+    phone_number = input("Enter  the customer phone number: ")
+    total_amount = 0
+    bill_data = f" bill for {customer_name}\nDate: {datetime.now()}\n\n"
+    
+    print("Available products:")
+    for idx, product in enumerate(products):
+        selling_price = product['cost_price'] * 2
+        print(f"{idx + 1}. {product['name']} ({product['brand']}) - {selling_price} Rs | Available: {product['quantity']}")
+
+    while True:
+        try:
+            product_choice = int(input("Enter product number to purchase: ")) - 1
+            if 0 <= product_choice < len(products):
+                break
+            else:
+                print("Invalid product number. Try again.")
+        except ValueError:
+            print("Please enter a valid number.")
+
+    while True:
+        try:
+            product_quantity = int(input(f"Enter quantity of {products[product_choice]['name']} to purchase: "))
+            if product_quantity <= 0:
+                print("Quantity must be greater than 0.")
+                continue
+
+            free_quantity = product_quantity // 3
+            total_quantity = product_quantity + free_quantity
+
+            if total_quantity > products[product_choice]['quantity']:
+                print(f"Not enough stock. Only {products[product_choice]['quantity']} items available including free ones.")
+                continue
+            break
+        except ValueError:
+            print("Please enter a valid number.")
+
+    free_quantity = product_quantity // 3
+    total_quantity = product_quantity + free_quantity
+    products[product_choice]['quantity'] -= total_quantity
+    
+    selling_price = products[product_choice]['cost_price'] * 2
+    total_amount += selling_price * product_quantity
+    
+    bill_data += f"Product: {products[product_choice]['name']} {products[product_choice]['brand']}\n"
+    bill_data += f"Quantity: {product_quantity} (Paid)\nFree Quantity: {free_quantity}\nTotal: {total_amount} Rs\n"
+    
+    bill_filename = f"bill_{customer_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    write_bill(bill_data, bill_filename)
+    
+    print(f"bill generated: {bill_filename}")
+    
+    update_stock(products, file_name)
+
+def main():
+    products = read_products("WeCare.txt")
+
+    if not products:
+        print(" No products loaded. Please check 'WeCare.txt'.")
+        return
+
+    while True:
+        print("\n" + "="*120)
+        print("\t\t\t\t📦 Welcome to WeCare Inventory System - USER Panel ")
+        print("="*120)
+        print("\nHello USER! Please choose an option from the menu below:\n")
+        
+       
+        print("  1.---------------Sell Product to Customer ------------------------------------------------------------------")                                                          
+        print("  2.-------------- Restock Inventory from Manufacturer---------------------------------------------------------")
+        print("  3.-------------- Display Product List-----------------------------------------------------------------------")
+        print("  4.-------------- Exit the System  ------------------------------------------------------------------------- ")
+        print("--------------------------------------------------------------------------------------------------------------")
+        
+        choice = input("Enter your choice: ")
+        
+        if choice == '1':
+            purchase_product(products)
+        
+        elif choice == '2':
+            print("\n Restocking feature is  coming in nere future!")
+
+        elif choice == '3':
+            print("\n This is our Current Product line up:")
+            for product in products:
+                print(f"- {product['name']} ({product['brand']}) - {product['quantity']} items in stock")
+
+        elif choice == '4':
+            print(" Exiting the system. Have a nice day dear, User!\n")
+            break
+
+        else:
+            print(" Invalid choice! Please select a valid option from the menu above.")
+
+
+if __name__ == "__main__":
+    main()
